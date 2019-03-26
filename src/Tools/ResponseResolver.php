@@ -42,17 +42,23 @@ class ResponseResolver
      */
     private function resolve(array $tags, array $routeProps)
     {
+        $responses = [];
         foreach (static::$strategies as $strategy) {
             $strategy = new $strategy();
-
+  
             /** @var Response[]|null $response */
-            $responses = $strategy($this->route, $tags, $routeProps);
-
-            if (! is_null($responses)) {
-                return array_map(function (Response $response) {
-                    return ['status' => $response->getStatusCode(), 'content' => $this->getResponseContent($response)];
-                }, $responses);
-            }
+            $responses = array_merge($responses, (array) $strategy($this->route, $tags, $routeProps));
+        }
+        if (!is_null($responses)) {
+            $mapped_responses = array_map(function (Response $response) {
+                return ['status' => $response->getStatusCode(), 'content' => $this->getResponseContent($response)];
+            }, $responses);
+  
+            usort($mapped_responses, function ($a, $b) {
+                return $a['status'] < $b['status'] ? -1 : 1;
+            });
+  
+            return $mapped_responses;
         }
     }
 
