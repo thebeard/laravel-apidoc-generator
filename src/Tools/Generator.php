@@ -72,6 +72,7 @@ class Generator
             'showresponse' => ! empty($content),
         ];
         $parsedRoute['headers'] = $rulesToApply['headers'] ?? [];
+        $parsedRoute['queryParameters'] = $rulesToApply['query'] ?? [];
 
         return $parsedRoute;
     }
